@@ -1,0 +1,18 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: whoami
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: PathPrefix(`/whoami`)
+      kind: Rule
+      services:
+        - name: whoami
+          port: {{ .Values.whoami.service.port }}
+          sticky:
+            cookie:
+              name: {{ .Values.whoami.stickySession.cookieName }}
+              httpOnly: {{ .Values.whoami.stickySession.httpOnly }}
+              secure: {{ .Values.whoami.stickySession.secure }}

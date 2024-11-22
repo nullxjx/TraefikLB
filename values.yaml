@@ -1,0 +1,46 @@
+whoami:
+  image: traefik/whoami
+  replicas: 5
+  service:
+    port: 80
+  stickySession:
+    enabled: true
+    cookieName: whoami_session
+    httpOnly: true
+    secure: false
+
+# 以下为外部 helm charts 的参数配置　
+# 集群网关 traefik stack 相关配置
+traefik:
+  env:
+    - name: TZ
+      value: "Asia/Shanghai"
+  # 由于2.x版本的traefik会输出很多无用的日志，例如ping@internal日志，导致有用的信息不容易找，所以这里暂时通过官方给的这种方式过滤掉这些日志
+  # 具体见 https://github.com/traefik/traefik/issues/6861  https://doc.traefik.io/traefik/reference/static-configuration/cli/
+  additionalArguments:
+    - "--accesslog=true"
+    - "--accesslog.fields.names.StartUTC=drop"
+    - "--accesslog.filters.minduration=1" # 设置traefik日志的时区
+  logs:
+    access:
+      enabled: true
+  providers:
+    kubernetesCRD:
+      namespaces: ["jasinxie"] # 这里需要换成你安装应用所在ns
+    kubernetesIngress:
+      namespaces: ["jasinxie"] # 这里需要换成你安装应用所在ns
+  service:
+    enabled: true
+    type: ClusterIP # 如果需要为traefik生成公网IP，这里使用 LoadBalancer
+  ingressRoute:
+    dashboard:
+      enabled: true
+  ports:
+    web:
+      port: 8000 # 对外访问的 Entrypoints
+      exposedPort: 8000
+      expose: true
+    traefik:
+      port: 9000  # Traefik Dashboard 的端口，通过 http://localhost:9000/dashboard/#/ 访问traefik 的 dashboard
+      exposedPort: 9000
+      expose: true

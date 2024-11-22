@@ -1,0 +1,12 @@
+apiVersion: v2
+appVersion: "1.0"
+description: a helm chart for using traefik as load balancer in k8s to replace the original Service
+name: TraefikLB-Helm-Chart
+version: 1.0.0
+
+dependencies:
+  - name: traefik
+    version: "~23.1.0"
+    repository: "https://helm.traefik.io/traefik"
+    tags:
+      - loadBalancing
